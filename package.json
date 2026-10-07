@@ -1,0 +1,13 @@
+{
+  "name": "mathia-deepsearch",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Backend for MATHIA DeepSearch \u2014 MATHIA's built-in web search and browsing experience.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
