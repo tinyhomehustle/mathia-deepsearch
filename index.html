@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MATHIA DeepSearch — Real Browser</title>
+<style>
+:root { color-scheme: dark; --bg:#060911; --surface:#111827; --edge:#30334b; --purple:#9a78ff; --text:#edf0fd; --muted:#9ca8c5; }
+* {box-sizing:border-box}
+body {margin:0;min-height:100dvh;background:radial-gradient(circle at 45% -20%,#302257 0%,transparent 36%),var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.shell {max-width:1480px;margin:auto;padding:16px clamp(12px,2.5vw,35px) 35px}
+header {display:flex;align-items:center;justify-content:space-between;gap:16px;margin:4px 0 15px}
+.brand {display:flex;align-items:center;gap:13px;min-width:0}
+.brand-icon{width:43px;height:43px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(145deg,#6d48d2,#372b78);font-size:22px;box-shadow:0 8px 30px #5b35de55}
+.brand strong{display:block;font-size:19px;letter-spacing:.025em}
+.brand small{color:var(--muted);font-size:12px}
+.pill{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid #343956;border-radius:999px;color:#b9c1d6;background:#111827;font-size:12px;white-space:nowrap}
+.dot{width:8px;height:8px;background:#94a3b8;border-radius:50%;box-shadow:0 0 0 3px #94a3b825}
+.dot.ready{background:#63d7b2;box-shadow:0 0 0 3px #63d7b225}
+.browser{border:1px solid #424267;border-radius:18px;background:#101421;overflow:hidden;box-shadow:0 18px 70px #0009}
+.toolbar{display:flex;align-items:center;gap:8px;padding:12px;background:linear-gradient(100deg,#171a2c,#121625);border-bottom:1px solid #31374c}
+button{font:inherit;cursor:pointer}
+.nav-btn {flex:none;width:35px;height:35px;border-radius:10px;color:#f0edff;background:#23283c;border:1px solid #3a4058;font-size:17px}
+.nav-btn:hover:not(:disabled),.go:hover{filter:brightness(1.18)}
+.nav-btn:disabled{opacity:.45;cursor:default}
+.address {flex:1;min-width:0;display:flex;align-items:center;gap:8px;border:1px solid #42435c;border-radius:11px;background:#090d18;padding:0 0 0 12px}
+.address span{font-size:13px;color:#aa97ff}
+input {min-width:0;font:inherit;outline:none}
+#url {border:0;background:transparent;color:var(--text);width:100%;height:37px;font-size:14px}
+.go{border:0;border-radius:0 9px 9px 0;padding:0 15px;height:37px;color:#fff;background:#6846c5;font-weight:700}
+.statusline{display:flex;justify-content:space-between;gap:10px;align-items:center;color:var(--muted);background:#111626;padding:6px 14px;font-size:12px;border-bottom:1px solid #282e41;min-height:31px}
+#site-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:65%}
+#viewport{position:relative;background:#fff;height:min(70dvh,730px);min-height:380px;touch-action:pan-y}
+#screen {display:none;width:100%;height:100%;object-fit:contain;cursor:crosshair;user-select:none;-webkit-user-drag:none;touch-action:none}
+#empty {height:100%;display:flex;align-items:center;justify-content:center;text-align:center;background:radial-gradient(circle at 50% 28%,#2e235a,#0a0c17 55%);color:var(--text);padding:30px}
+#empty .inner{max-width:580px}
+#empty .globe{font-size:64px;margin-bottom:18px}
+#empty h1{font-size:clamp(30px,5vw,48px);line-height:1.13;margin:0 0 12px;font-weight:800;letter-spacing:-.04em}
+#empty h1 em{font-style:normal;background:linear-gradient(110deg,#b798ff,#7867ec,#4d8fff);background-clip:text;color:transparent}
+#empty p{color:#aeb8d2;margin:0 auto 20px;max-width:470px}
+.quick {display:flex;flex-wrap:wrap;justify-content:center;gap:9px}
+.quick button{background:#1e2140;border:1px solid #53488a;border-radius:9px;color:#e4dbff;padding:10px 14px}
+#overlay {pointer-events:none;position:absolute;left:0;bottom:0;right:0;text-align:center;padding:10px;background:linear-gradient(transparent,#0009);color:#fff;font-size:12px;display:none}
+.footbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;padding:11px 14px;color:var(--muted);font-size:13px;border-top:1px solid #2b2f46}
+#type-text {flex:1;min-width:110px;height:35px;padding:0 11px;border-radius:9px;border:1px solid #3c4260;background:#0b101e;color:var(--text)}
+.smallbtn{border:1px solid #3d4161;color:#d9d4fc;background:#25243d;border-radius:9px;padding:7px 12px;white-space:nowrap}
+.note{padding:13px 2px;color:var(--muted);font-size:12px}
+@media (max-width:680px) {.shell{padding:10px}.brand strong{font-size:16px}.brand small{font-size:11px}.pill{padding:6px 9px}.toolbar{gap:5px;padding:8px}.nav-btn{width:29px;height:34px;font-size:14px}.address{padding-left:8px}.go{padding:0 9px}.brand-icon{width:37px;height:37px}#viewport{height:62dvh;min-height:330px}.quick button{padding:9px 10px}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header><div class="brand"><div class="brand-icon">🌐</div><div><strong>MATHIA DeepSearch</strong><small>Browser Engine v0.3 · Chromium powered</small></div></div><div class="pill"><i id="dot" class="dot"></i><span id="connection">Connecting…</span></div></header>
+<section class="browser" aria-label="DeepSearch browser">
+<div class="toolbar">
+<button class="nav-btn" id="back" aria-label="Back" title="Back">←</button>
+<button class="nav-btn" id="forward" aria-label="Forward" title="Forward">→</button>
+<button class="nav-btn" id="reload" aria-label="Reload" title="Reload">↻</button>
+<button class="nav-btn" id="home" aria-label="Home" title="Home">⌂</button>
+<form class="address" id="address-form"><span>🌐</span><input id="url" aria-label="Search or enter a website" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Search or enter a URL…"><button class="go" type="submit">Go</button></form>
+</div>
+<div class="statusline"><span id="site-title">Your browser is starting</span><span id="load-state">Connecting to Chrome…</span></div>
+<div id="viewport" tabindex="0" aria-label="Interactive remote web page">
+<img id="screen" alt="Interactive Chrome browser view" draggable="false">
+<div id="empty"><div class="inner"><div class="globe">🌐</div><h1>Welcome to <em>DeepSearch.</em></h1><p>A real Chrome browser behind MATHIA. Search, browse, click links and explore websites without the old HTML-only viewer.</p><div class="quick"><button data-url="https://www.wikipedia.org/">Wikipedia</button><button data-url="https://www.google.com/">Google</button><button data-url="https://www.bing.com/search?q=NBA+standings">NBA</button></div></div></div>
+<div id="overlay"></div>
+</div>
+<div class="footbar"><label for="type-text">Type on page:</label><input id="type-text" placeholder="Type into the selected website field"><button id="type-go" class="smallbtn">Type</button><button id="enter" class="smallbtn">Enter ↵</button><button id="tab" class="smallbtn">Tab ⇥</button></div>
+</section>
+<div class="note">Runs on the DeepSearch server, not your device. Some protected videos, logins and cloud games may not work. Browser sessions expire after inactivity.</div>
+</div>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const url = $('url'), screen = $('screen'), viewport = $('viewport');
+  let sid = '', token = '', ws = null, connected = false, currentUrl = '', busy = false;
+  let viewW = 1160, viewH = 710, refreshTimer = null, pointer = null, lastTouchY = null;
+  function state(message, ready) {
+    $('connection').textContent = message;
+    $('dot').classList.toggle('ready',!!ready);
+    $('load-state').textContent = message;
+  }
+  function report(message) {
+    $('overlay').textContent = message;
+    $('overlay').style.display = 'block';
+    clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(() => { $('overlay').style.display = 'none'; }, 4000);
+  }
+  function send(obj) {
+    if (!ws || ws.readyState !== WebSocket.OPEN) return report('Browser connection lost. Refresh to reconnect.');
+    ws.send(JSON.stringify(obj));
+  }
+  function guessAddress(raw) {
+    const s = String(raw || '').trim();
+    if (!s) return '';
+    if (/^https?:\/\//i.test(s)) return s;
+    if (/^(localhost|\d+\.\d+\.\d+\.\d+)/i.test(s)) return 'https://' + s;
+    if (/^[^\s]+\.[a-z]{2,}(?:[/:?#]|$)/i.test(s)) return 'https://' + s;
+    return 'https://www.google.com/search?q=' + encodeURIComponent(s);
+  }
+  function navigate(s) { const next = guessAddress(s); if (!next) return; url.value = next; send({type:'navigate',url:next}); state('Loading…',true); }
+  function coords(clientX,clientY) {
+    const r = screen.getBoundingClientRect();
+    const scale = Math.min(r.width / viewW,r.height / viewH);
+    const w = viewW * scale, h = viewH * scale;
+    return { x: Math.max(0,Math.min(viewW-1,Math.round((clientX-r.left-(r.width-w)/2)/scale))),
+      y:Math.max(0,Math.min(viewH-1,Math.round((clientY-r.top-(r.height-h)/2)/scale))) };
+  }
+  async function connect() {
+    state('Starting Chrome…',false);
+    try {
+      const resp = await fetch('/api/browser/session',{method:'POST'});
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || 'Cannot start browser.');
+      sid = data.id; token = data.token; viewW = data.width;viewH=data.height;
+      const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(proto + '//' + location.host + '/api/browser/ws?session=' + encodeURIComponent(sid) + '&token=' + encodeURIComponent(token));
+      ws.onopen = () => { connected = true;state('Browser ready',true); };
+      ws.onmessage = ev => {
+        let d;try {d=JSON.parse(ev.data);} catch {return;}
+        if (d.type === 'frame') {
+          if (d.width) viewW=d.width;if (d.height) viewH=d.height;
+          screen.src = 'data:image/jpeg;base64,' + d.data;
+          screen.style.display = 'block';$('empty').style.display='none';
+        } else if (d.type === 'state') {
+          if (d.url && d.url !== 'about:blank') {
+            currentUrl = d.url;
+            if (document.activeElement !== url) url.value = d.url;
+          }
+          $('site-title').textContent = d.title || (currentUrl || 'MATHIA DeepSearch');
+          busy=!!d.busy;
+          $('load-state').textContent = busy ? 'Loading…' : 'Chromium connected';
+        } else if (d.type === 'error') report(d.error);
+      };
+      ws.onclose = () => { connected=false;state('Connection closed — refresh page',false); };
+      ws.onerror = () => state('Browser connection error',false);
+      window.setInterval(() => { if (connected) send({type:'heartbeat'}); }, 20_000);
+    } catch (e) {state('Browser unavailable',false);$('site-title').textContent = e.message;report(e.message);}
+  }
+  $('address-form').addEventListener('submit',e=>{e.preventDefault();navigate(url.value);viewport.focus();});
+  $('back').onclick=()=>send({type:'back'});
+  $('forward').onclick=()=>send({type:'forward'});
+  $('reload').onclick=()=>send({type:'reload'});
+  $('home').onclick=()=>{screen.style.display='none';$('empty').style.display='flex';currentUrl='';url.value='';$('site-title').textContent='MATHIA DeepSearch';};
+  document.querySelectorAll('[data-url]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.url)));
+  screen.addEventListener('click',e=>{if (pointer && pointer.moved) return;const p=coords(e.clientX,e.clientY);send({type:'click',...p});viewport.focus();});
+  viewport.addEventListener('wheel',e=>{if(screen.style.display!=='block')return;e.preventDefault();send({type:'wheel',deltaX:e.deltaX,deltaY:e.deltaY});},{passive:false});
+  screen.addEventListener('touchstart',e=>{lastTouchY=e.touches[0]?.clientY || null;},{passive:true});
+  screen.addEventListener('touchmove',e=>{if(lastTouchY===null)return;const now=e.touches[0]?.clientY;if(now==null)return;const dy=lastTouchY-now;if(Math.abs(dy)>5){send({type:'wheel',deltaY:dy*2});lastTouchY=now;}},{passive:true});
+  screen.addEventListener('touchend',()=>{lastTouchY=null;});
+  viewport.addEventListener('keydown',e=>{
+    if(e.target!==viewport)return;
+    e.preventDefault();
+    if(e.key.length===1 && !e.ctrlKey && !e.metaKey && !e.altKey)send({type:'insertText',text:e.key});
+    else if(['Enter','Tab','Backspace','Escape','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Delete',' '].includes(e.key))send({type:'press',key:e.key===' '?'Space':e.key});
+  });
+  $('type-go').onclick=()=>{const inp=$('type-text');if(inp.value){send({type:'insertText',text:inp.value});inp.value='';viewport.focus();}};
+  $('enter').onclick=()=>send({type:'press',key:'Enter'});
+  $('tab').onclick=()=>send({type:'press',key:'Tab'});
+  window.addEventListener('pagehide',()=>{if(sid && token)fetch('/api/browser/'+sid,{method:'DELETE',headers:{'X-DeepSearch-Token':token},keepalive:true}).catch(()=>{});});
+  connect();
+})();
+</script>
+</body></html>
