@@ -1,12 +1,12 @@
 {
   "name": "mathia-deepsearch",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "type": "module",
-  "description": "MATHIA DeepSearch: Chromium browser engine and interactive remote web viewer",
+  "description": "MATHIA DeepSearch Chromium startup repair",
   "scripts": {
-    "start": "node server.js",
-    "check": "node --check server.js"
+    "start": "node bootstrap.js",
+    "check": "node --check bootstrap.js && node --check server.js"
   },
   "engines": { "node": ">=20" },
   "dependencies": {
