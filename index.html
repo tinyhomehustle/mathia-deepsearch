@@ -49,7 +49,7 @@ input {min-width:0;font:inherit;outline:none}
 </head>
 <body>
 <div class="shell">
-<header><div class="brand"><div class="brand-icon">🌐</div><div><strong>MATHIA DeepSearch</strong><small>Browser Engine v0.3 · Chromium powered</small></div></div><div class="pill"><i id="dot" class="dot"></i><span id="connection">Connecting…</span></div></header>
+<header><div class="brand"><div class="brand-icon">🌐</div><div><strong>MATHIA DeepSearch</strong><small>Browser Engine v0.3.2 · Chromium powered</small></div></div><div class="pill"><i id="dot" class="dot"></i><span id="connection">Connecting…</span></div></header>
 <section class="browser" aria-label="DeepSearch browser">
 <div class="toolbar">
 <button class="nav-btn" id="back" aria-label="Back" title="Back">←</button>
@@ -108,9 +108,16 @@ input {min-width:0;font:inherit;outline:none}
   async function connect() {
     state('Starting Chrome…',false);
     try {
-      const resp = await fetch('/api/browser/session',{method:'POST'});
-      const data = await resp.json();
-      if (!resp.ok) throw new Error(data.error || 'Cannot start browser.');
+      let resp, data;
+      for (let attempt = 0; attempt < 24; attempt++) {
+        resp = await fetch('/api/browser/session',{method:'POST'});
+        data = await resp.json();
+        if (resp.ok) break;
+        if (attempt === 23 || !/Chrome could not start|Could not find Chrome|browser.*(unavailable|busy)|executable/i.test(data.error || ''))
+          throw new Error(data.error || 'Cannot start browser.');
+        state('Installing Chrome… retrying automatically',false);
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
       sid = data.id; token = data.token; viewW = data.width;viewH=data.height;
       const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
       ws = new WebSocket(proto + '//' + location.host + '/api/browser/ws?session=' + encodeURIComponent(sid) + '&token=' + encodeURIComponent(token));

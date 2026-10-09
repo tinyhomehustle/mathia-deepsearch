@@ -1,9 +1,9 @@
 {
   "name": "mathia-deepsearch",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "private": true,
   "type": "module",
-  "description": "MATHIA DeepSearch Chromium startup repair",
+  "description": "MATHIA DeepSearch - nonblocking Chromium initialization",
   "scripts": {
     "start": "node bootstrap.js",
     "check": "node --check bootstrap.js && node --check server.js"
